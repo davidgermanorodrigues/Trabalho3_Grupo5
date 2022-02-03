@@ -1,0 +1,34 @@
+<launch>
+
+        <!--Bloco 1: argumentos do launch file.-->
+    <rosparam command="load" file="$(find psr_game)/params/game.yaml"/>
+
+    <include file="$(find psr_game)/launch/bringup.launch">
+        <arg name="player_name" value="red1"/>
+        <arg name="player_color" value="Red"/>
+        <arg name="x_pos" value="5"/>
+        <arg name="y_pos" value="5"/>
+        <arg name="z_pos" value="0"/>
+        <arg name="visualize" value="True"/>
+    </include>
+
+            <!-- Include de green.Players-->
+    <include file="$(find psr_game)/launch/bringup.launch">
+        <arg name="player_name" value="green1"/>
+        <arg name="player_color" value="Green"/>
+        <arg name="x_pos" value="-5"/>
+        <arg name="y_pos" value="5"/>
+        <arg name="z_pos" value="0"/>
+    </include>
+
+
+            <!-- Include de blue.Players-->
+    <include file="$(find psr_game)/launch/bringup.launch">
+        <arg name="player_name" value="blue1"/>
+        <arg name="player_color" value="Blue"/>
+        <arg name="x_pos" value="-5"/>
+        <arg name="y_pos" value="-5"/>
+        <arg name="z_pos" value="0"/>
+    </include>
+
+</launch>
