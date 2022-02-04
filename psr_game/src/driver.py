@@ -19,6 +19,7 @@ class Driver:
 
     def __init__(self):
 
+        # ------VARIABLES------
         self.name = None
         self.my_team = None
         self.width = None
@@ -27,14 +28,20 @@ class Driver:
         self.goal = PoseStamped()
         self.angle = None
         self.speed = None
+        self.Turn_Right = None
+        self.Turn_Left = None
+        self.Reverse = None
+        self.V_Slow = None
+        self.V_Medium = None
+        self.V_Fast = None
 
+        # ------NAME AND TEAM------
         self.name = rospy.get_name().strip('/')
         team_red = rospy.get_param('/red_players')
         team_green = rospy.get_param('/green_players')
         team_blue = rospy.get_param('/blue_players')
 
         self.laser_scan = rospy.Subscriber("/" + self.name + "/scan", LaserScan, self.laser)
-
 
         if self.name in team_red:
             self.my_team = "red"
@@ -53,6 +60,7 @@ class Driver:
 
         print("Im " + self.name + ". I am team " + str(self.my_team))
 
+        # ------CENAS------
         self.bridge = CvBridge()
         image_topic = ('/' + self.name +'/camera/rgb/image_raw')
         self.image_sub = rospy.Subscriber(image_topic, Image, self.Image_Processing)
@@ -60,50 +68,90 @@ class Driver:
         #self.timer = rospy.Timer(rospy.Duration(0.1), self.Move)
 
     def laser(self, msg):
-        min=1
-        #Incremento=0.0175
-        #ranges[0] = para trás
-        #angle_max=2*pi
-        #São 359 medidas (angle_max/incremento~359), logo o index pode ser traduzido em graus
+        # ------GATHERING OF MESURES LASER------
+        min=1.25
+        min2=1.05
+        min3=0.30
+        Wall=0.20
 
-        med_E  = msg.ranges[90]
-        med_NE = msg.ranges[45]
+        #Incremento=0.0175,ranges[0] = para a frente, angle_max=2*pi,são 359 medidas (angle_max/incremento~359), logo o index pode ser traduzido em graus
+
+        med_E  = msg.ranges[80] #Propositado
+        med_NE = msg.ranges[35]
         med_N  = msg.ranges[0]
-        med_NW = msg.ranges[315]
-        med_W  = msg.ranges[270]
+        med_NW = msg.ranges[325]
+        med_W  = msg.ranges[280] #Propositado
 
 
-        #------WALL LEFT------
-        if (med_E < min and med_NE < min) or (med_N < min and med_E < min):
-            self.Turn_Right = True
-            self.Turn_Left = False
-            self.Stop = False
+        if med_E < min3: sensor_E=True
+        else: sensor_E= False
+        if med_NE < min2: sensor_NE=True
+        else: sensor_NE= False
+        if med_N < min: sensor_N=True
+        else: sensor_N= False
+        if med_NW < min2: sensor_NW=True
+        else: sensor_NW= False
+        if med_W < min3: sensor_W=True
+        else: sensor_W = False
 
-        # ------WALL RIGHT------
-        elif med_W < min and med_NW < min or (med_N < min and med_W < min):
-            self.Turn_Right = False
-            self.Turn_Left = True
-            self.Stop = False
+            #------WALL DETECTION------
+        if (med_N > Wall and med_NE > Wall) or (med_N > Wall and med_NW > Wall) :
 
-        # ------WALL FRONT------
-        elif med_N < min:
-            self.Turn_Right = False
-            self.Turn_Left = False
-            self.Stop = True
+            #------WALL LEFT------
+            if (sensor_NE and sensor_E) or (sensor_N and sensor_E) or (sensor_N and sensor_NE):
+                self.Turn_Right = True
+                self.Turn_Left = False
+                self.Reverse = False
 
-        # ------NOTHING------
+            # ------WALL RIGHT------
+            elif (sensor_NW and sensor_W) or (sensor_N and sensor_W) or (sensor_N and sensor_NW):
+                self.Turn_Right = False
+                self.Turn_Left = True
+                self.Reverse = False
+
+            # ------NOTHING------
+            else:
+                self.Turn_Right = False
+                self.Turn_Left = False
+                self.Reverse = False
+
         else:
+            # ------STUCK AGAINST WALL------
+            self.Reverse = True
             self.Turn_Right = False
             self.Turn_Left = False
-            self.Stop = False
+
+        # ------SPEED METER------
+        if med_N < 1.45 :
+            self.V_Slow = True
+            self.V_Medium = False
+            self.V_Fast = False
+
+        elif ((med_N > 1.45) and (med_N < 3.5) or (str(med_N) == str('inf')) ) and (med_E < 3.5 or med_W < 3.5):
+            self.V_Slow = False
+            self.V_Medium = True
+            self.V_Fast = False
+
+        else:
+            self.V_Slow = False
+            self.V_Medium = False
+            self.V_Fast = True
+
+        #print(med_E)
+        #print(med_NE)
+        #print(med_N)
+        #print(med_NW)
+        #print(med_W)
+
 
     def Image_Processing(self, data):
+        # ------IMAGE PROCESSING ------
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError:
             print('Erro com a Camara')
 
-
+        # ------HUNT AND ESCAPE ID ------
         if self.my_team == 'red':
             self.limit_hunt = [(0,150,0),(20, 255, 20)]
             self.limit_escape = [(150,0,0),(20, 20, 255)]
@@ -117,9 +165,7 @@ class Driver:
             self.limit_hunt = [(50,0,0),(255, 50, 50)]
             self.limit_escape = [(0,0,50),(50, 50, 255)]
 
-
-                # Creating Mask with limits defined
-
+        # ------MASKS------
         hunt_limit_inf = np.array(self.limit_hunt[0])
         hunt_limit_sup = np.array(self.limit_hunt[1])
 
@@ -129,7 +175,7 @@ class Driver:
         Mask_hunt= cv2.inRange(cv_image, hunt_limit_inf, hunt_limit_sup)
         Mask_escape = cv2.inRange(cv_image, escape_limit_inf, escape_limit_sup)
 
-        #------------------MASK HUNT-----------------------
+        # ------MASKS HUNT------
 
         # Find largest contour in mask
         try:
@@ -262,34 +308,51 @@ class Driver:
         #cv2.imshow('CM', Mask_closed)
         self.width = cv_image.shape[1]
         self.centroid_hunt = centroid_hunt[0]
-        self.Move(self.goal_active,self.width,self.centroid_hunt,self.Turn_Right,self.Turn_Left,self.Stop)
+        self.Move(self.goal_active,self.goal_escape,self.width,self.centroid_hunt,
+                  self.Turn_Right,self.Turn_Left,self.Reverse,self.V_Slow,self.V_Medium,
+                  self.V_Fast)
         cv2.waitKey(1)
 
-    def Move(self,goal_active,width,centroid_hunt,Turn_Right,Turn_Left,Stop):
+    def Move(self,goal_active,goal_escape,width,centroid_hunt,Turn_Right,
+             Turn_Left,Reverse,V_Slow,V_Medium,V_Fast):
 
-        print(Turn_Right)
-
+        # ------NAVIGATION------
         if not goal_active:
-            self.angle = 0
-            self.speed = 0
 
-        elif Turn_Right == True:
-            self.speed = 0.5
-            self.angle = 0.7
+            if not Reverse:
 
-        elif Turn_Left == True:
-            self.speed = 0.5
-            self.angle = -0.70
+                if Turn_Right == True:
+                    self.speed = 0.38
+                    self.angle = -1.16
+                    print('Turn Right')
 
-        elif Stop == True:
-            self.speed = 0
-            self.angle = 1
+                elif Turn_Left == True:
+                    self.speed = 0.38
+                    self.angle = 1.16
+                    print('Turn Left')
+
+                else:
+                    if V_Slow:
+                        self.speed=0.6
+                        self.angle=0
+                        print('Foward Slow')
+                    elif V_Medium:
+                        self.speed=0.8
+                        self.angle=0
+                        print('Foward Medium')
+                    elif V_Fast:
+                        self.speed=1.2
+                        self.angle=0
+                        print('Foward Fast')
+
+            else:
+                self.speed = -8.5
+                self.angle = 0
+                print('Wall')
 
         else:
-            self.speed = 1.2
             print('Veiculo detetado : Perseguindo')
-
-
+            self.speed=0.8
             if centroid_hunt < width * 0.5:
                 if centroid_hunt < (0.8 * (width / 2)):
                     self.angle = 0.70
@@ -305,8 +368,9 @@ class Driver:
 
 
         twist = Twist()
+        #self.speed = 0
+        #self.angle = 0
         twist.linear.x = self.speed
-        twist.linear.x = 1
         twist.angular.z = self.angle
         #print(twist)
         self.publisher_command.publish(twist)
