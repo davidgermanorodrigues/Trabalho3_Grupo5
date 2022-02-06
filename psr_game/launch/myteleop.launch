@@ -1,6 +1,8 @@
 <launch>
-    <arg name="player_name" default="p_mpinto"/>
+    <arg name="player_name" default="blue1"/>
+
     <group ns="$(arg player_name)">
+
         <node pkg= "psr_game" type="myteleop.py" name="myteleop" output="screen">
             <remap from="/cmd_vel" to="/$(arg player_name)/cmd_vel"/>
         </node>

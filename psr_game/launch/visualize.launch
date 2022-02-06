@@ -1,5 +1,7 @@
 <launch>
     <!-- Launch rviz, loading configuration file -->
-    <node name="rviz" pkg="rviz" type="rviz"
-          args="--display-config $(find psr_game)/config/visualize.rviz" required="false"/>
+    <arg name="player_name" default="p_drodrigues"/>
+
+<!--    <node name="rviz" pkg="rviz" type="rviz" args="&#45;&#45;display-config $(find psr_game)/config/$(arg player_name).rviz"/>-->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find p_drodrigues_bringup)/config/$(arg player_name).rviz" />
 </launch>
