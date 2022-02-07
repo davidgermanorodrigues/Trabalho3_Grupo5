@@ -68,11 +68,12 @@ class Driver:
         #self.timer = rospy.Timer(rospy.Duration(0.1), self.Move)
 
     def laser(self, msg):
-        # ------GATHERING OF MESURES LASER------
+        # ------GATHERING OF MEASURES LASER------
         min=1.25
         min2=1.05
         min3=0.30
-        Wall=0.20
+        # Wall=0.20
+        Wall = 0.50
 
         #Incremento=0.0175,ranges[0] = para a frente, angle_max=2*pi,são 359 medidas (angle_max/incremento~359), logo o index pode ser traduzido em graus
 
@@ -137,11 +138,11 @@ class Driver:
             self.V_Medium = False
             self.V_Fast = True
 
-        #print(med_E)
-        #print(med_NE)
-        #print(med_N)
-        #print(med_NW)
-        #print(med_W)
+        # print(med_E)
+        # print(med_NE)
+        # print(med_N)
+        # print(med_NW)
+        # print(med_W)
 
 
     def Image_Processing(self, data):
@@ -153,8 +154,9 @@ class Driver:
 
         # ------HUNT AND ESCAPE ID ------
         if self.my_team == 'red':
-            self.limit_hunt = [(0,150,0),(20, 255, 20)]
-            self.limit_escape = [(150,0,0),(20, 20, 255)]
+            self.limit_hunt = [(0,100,0),(20, 255, 20)]
+            # self.limit_escape = [(150,0,0),(20, 20, 255)]
+            self.limit_escape = [(50, 0, 0), (150, 20, 255)]
 
         elif self.my_team == 'blue':
             self.limit_hunt = ([0,0,100],[50,50,255])
@@ -163,7 +165,7 @@ class Driver:
 
         elif self.my_team == 'green':
             self.limit_hunt = [(50,0,0),(255, 50, 50)]
-            self.limit_escape = [(0,0,50),(50, 50, 255)]
+            self.limit_escape = [(0,0,100),(50, 50, 255)]
 
         # ------MASKS------
         hunt_limit_inf = np.array(self.limit_hunt[0])
@@ -174,6 +176,9 @@ class Driver:
 
         Mask_hunt= cv2.inRange(cv_image, hunt_limit_inf, hunt_limit_sup)
         Mask_escape = cv2.inRange(cv_image, escape_limit_inf, escape_limit_sup)
+
+        # cv2.imshow('M_hunt', Mask_hunt)
+        # cv2.imshow('M_escape', Mask_escape)
 
         # ------MASKS HUNT------
 
@@ -281,7 +286,6 @@ class Driver:
 
         if centroid_escape != (0, 0):
 
-
             # Drawing a cross
             x = centroid_escape[0]
             y = centroid_escape[1]
@@ -304,17 +308,18 @@ class Driver:
 
 
         #cv2.namedWindow('Webcam', cv2.WINDOW_AUTOSIZE)
-        cv2.imshow("Image window", cv_image)
-        #cv2.imshow('CM', Mask_closed)
+        cv2.imshow("Image window " + self.name, cv_image)
+        # cv2.imshow('CM', Mask_closed)
+
         self.width = cv_image.shape[1]
+        # print(str(cv_image.shape[1]))
         self.centroid_hunt = centroid_hunt[0]
         self.Move(self.goal_active,self.goal_escape,self.width,self.centroid_hunt,
                   self.Turn_Right,self.Turn_Left,self.Reverse,self.V_Slow,self.V_Medium,
                   self.V_Fast)
         cv2.waitKey(1)
 
-    def Move(self,goal_active,goal_escape,width,centroid_hunt,Turn_Right,
-             Turn_Left,Reverse,V_Slow,V_Medium,V_Fast):
+    def Move(self,goal_active,goal_escape,width,centroid_hunt,Turn_Right,Turn_Left,Reverse,V_Slow,V_Medium,V_Fast):
 
         # ------NAVIGATION------
         if not goal_active:
@@ -332,7 +337,11 @@ class Driver:
                     print('Turn Left')
 
                 else:
-                    if V_Slow:
+                    if goal_escape == True:
+                        self.speed = 1.0
+                        self.angle = 1.0
+                        print('Escaping')
+                    elif V_Slow:
                         self.speed=0.6
                         self.angle=0
                         print('Foward Slow')
@@ -351,7 +360,8 @@ class Driver:
                 print('Wall')
 
         else:
-            print('Veiculo detetado : Perseguindo')
+            # print('Veiculo detetado : Perseguindo')
+            print('Hunting')
             self.speed=0.8
             if centroid_hunt < width * 0.5:
                 if centroid_hunt < (0.8 * (width / 2)):
