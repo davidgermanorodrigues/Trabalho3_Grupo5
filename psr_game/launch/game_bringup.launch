@@ -12,6 +12,15 @@
         <arg name="visualize" value="True"/>
     </include>
 
+<!--    <include file="$(find psr_game)/launch/bringup.launch">-->
+<!--        <arg name="player_name" default="red2"/>-->
+<!--        <arg name="player_color" value="Red"/>-->
+<!--        <arg name="x_pos" value="5"/>-->
+<!--        <arg name="y_pos" value="5"/>-->
+<!--        <arg name="z_pos" value="0"/>-->
+<!--        <arg name="visualize" value="True"/>-->
+<!--    </include>-->
+
             <!-- Include de green.Players-->
     <include file="$(find psr_game)/launch/bringup.launch">
         <arg name="player_name" default="green1"/>
@@ -21,6 +30,13 @@
         <arg name="z_pos" value="0"/>
     </include>
 
+<!--    <include file="$(find psr_game)/launch/bringup.launch">-->
+<!--        <arg name="player_name" default="green2"/>-->
+<!--        <arg name="player_color" value="Green"/>-->
+<!--        <arg name="x_pos" value="-5"/>-->
+<!--        <arg name="y_pos" value="5"/>-->
+<!--        <arg name="z_pos" value="0"/>-->
+<!--    </include>-->
 
             <!-- Include de blue.Players-->
     <include file="$(find psr_game)/launch/bringup.launch">

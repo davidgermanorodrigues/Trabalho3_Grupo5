@@ -9,12 +9,12 @@
     <arg name="z_pos" default="0.0"/>
 
     <group ns="$(arg player_name)">
+
         <param name="tf_prefix" value="$(arg player_name)"></param>
         <!--Bloco 3: Carregamento do xacro do robot para o parâmetro robot_description.-->
 <!--        <param name="robot_description" command="$(find xacro)/xacro &#45;&#45;inorder $(find p_mpinto_description)/urdf/p_mpinto.urdf.xacro player_name:=$(arg player_name) player_color:=$(arg player_color)" />-->
-        <param name="robot_description" command="$(find xacro)/xacro --inorder $(find p_drodrigues_description)/urdf/p_drodrigues.urdf.xacro player_name:=$(arg player_name) player_color:=$(arg player_color)" />
+        <param name="robot_description" command="$(find xacro)/xacro --inorder $(find p_grupo_description)/urdf/p_grupo5.urdf.xacro player_name:=$(arg player_name) player_color:=$(arg player_color)" />
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
-
 
         <!-- Include do spwan.launch-->
         <include file="$(find psr_game)/launch/spwan.launch">
@@ -31,7 +31,15 @@
             </include>
         </group>
 
+        <include file="$(find psr_game)/launch/set_player_names.launch">
+        </include>
+
     </group>
+
+    <!--Include do gmapping.launch -->
+    <include file="$(find p_drodrigues_bringup)/launch/gmapping.launch">
+        <arg name="player_name" value="$(arg player_name)"/>
+    </include>
 
             <!-- Include do vizualize launch-->
  <!--

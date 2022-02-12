@@ -47,23 +47,30 @@ class Driver:
             self.my_team = "red"
             self.prey_team_players = team_green
             self.hunter_team_players = team_blue
+            print("My name is " + Fore.RED + self.name + Style.RESET_ALL + ". I am " + Fore.RED + str(self.my_team) + Style.RESET_ALL + " I am hunting " + Fore.GREEN + str(self.prey_team_players) + Style.RESET_ALL + " and fleeing from " + Fore.BLUE + str(self.hunter_team_players) + Style.RESET_ALL);
 
         elif self.name in team_green:
             self.my_team = "green"
             self.prey_team_players = team_blue
             self.hunter_team_players = team_red
+            print("My name is " + Fore.GREEN + self.name + Style.RESET_ALL + ". I am " + Fore.GREEN + str(self.my_team) + Style.RESET_ALL + " I am hunting " + Fore.BLUE + str(self.prey_team_players) + Style.RESET_ALL + " and fleeing from " + Fore.RED + str(self.hunter_team_players) + Style.RESET_ALL);
 
         elif self.name in team_blue:
             self.my_team = "blue"
             self.prey_team_players = team_red
             self.hunter_team_players = team_green
+            print("My name is " + Fore.BLUE + self.name + Style.RESET_ALL + ". I am " + Fore.BLUE + str(self.my_team) + Style.RESET_ALL + " I am hunting " + Fore.RED + str(self.prey_team_players) + Style.RESET_ALL + " and fleeing from " + Fore.GREEN + str(self.hunter_team_players) + Style.RESET_ALL);
 
-        print("Im " + self.name + ". I am team " + str(self.my_team))
+        # print("Im " + self.name + ". I am team " + str(self.my_team))
+        # print("My name is " + self.name + ". I am " + str(self.my_team) + " I am hunting " + str(self.prey_team_players) + " and fleeing from "+ str(self.prey_team_players));
 
         # ------CENAS------
         self.bridge = CvBridge()
         image_topic = ('/' + self.name +'/camera/rgb/image_raw')
-        self.image_sub = rospy.Subscriber(image_topic, Image, self.Image_Processing)
+        try:
+            self.image_sub = rospy.Subscriber(image_topic, Image, self.Image_Processing)
+        except:
+            pass
         self.publisher_command = rospy.Publisher( '/' + self.name + '/cmd_vel', Twist, queue_size=1)
         #self.timer = rospy.Timer(rospy.Duration(0.1), self.Move)
 
