@@ -83,12 +83,12 @@ class Driver:
         Wall = 0.50
 
         #Incremento=0.0175,ranges[0] = para a frente, angle_max=2*pi,são 359 medidas (angle_max/incremento~359), logo o index pode ser traduzido em graus
-
-        med_E  = msg.ranges[80] #Propositado
-        med_NE = msg.ranges[35]
+        
+        med_E  = msg.ranges[70] #Propositado
+        med_NE = msg.ranges[25]
         med_N  = msg.ranges[0]
-        med_NW = msg.ranges[325]
-        med_W  = msg.ranges[280] #Propositado
+        med_NW = msg.ranges[25]
+        med_W  = msg.ranges[290] #Propositado
 
 
         if med_E < min3: sensor_E=True
@@ -130,7 +130,7 @@ class Driver:
             self.Turn_Left = False
 
         # ------SPEED METER------
-        if med_N < 1.45 :
+        if med_N < 1.45 or (med_E < 1 or med_W < 1):
             self.V_Slow = True
             self.V_Medium = False
             self.V_Fast = False
