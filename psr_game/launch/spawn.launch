@@ -1,7 +1,7 @@
 
 <launch>
     <!--Bloco 1: argumentos do launch file.-->
-    <arg name="player_name" default="p_mpinto"/>
+    <arg name="player_name" default="p_grupo5"/>
     <arg name="x_pos" default="-3.0"/>
     <arg name="y_pos" default="1.0"/>
     <arg name="z_pos" default="0.0"/>

@@ -395,7 +395,7 @@ class Driver:
 
 def main():
 
-    rospy.init_node('p_mpinto_driver', anonymous=False)
+    rospy.init_node('p_grupo5_driver', anonymous=False)
     driver = Driver()
     rospy.spin()
 

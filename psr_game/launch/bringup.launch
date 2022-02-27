@@ -1,7 +1,7 @@
 <launch>
     <!--Bloco 1: argumentos do launch file.-->
     <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
-    <arg name="player_name" default="p_mpinto"/>
+    <arg name="player_name" default="p_grupo5"/>
     <arg name="player_color" default="Red"/>
     <arg name="visualize" default="false"/>
     <arg name="x_pos" default="0.0"/>
@@ -16,8 +16,8 @@
         <param name="robot_description" command="$(find xacro)/xacro --inorder $(find p_grupo_description)/urdf/p_grupo5.urdf.xacro player_name:=$(arg player_name) player_color:=$(arg player_color)" />
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
-        <!-- Include do spwan.launch-->
-        <include file="$(find psr_game)/launch/spwan.launch">
+        <!-- Include do spawn.launch-->
+        <include file="$(find psr_game)/launch/spawn.launch">
             <arg name="player_name" value="$(arg player_name)"/>
             <arg name="x_pos" value="$(arg x_pos)"/>
             <arg name="y_pos" value="$(arg y_pos)"/>
@@ -37,7 +37,7 @@
     </group>
 
     <!--Include do gmapping.launch -->
-    <include file="$(find p_drodrigues_bringup)/launch/gmapping.launch">
+    <include file="$(find psr_game)/launch/gmapping.launch">
         <arg name="player_name" value="$(arg player_name)"/>
     </include>
 

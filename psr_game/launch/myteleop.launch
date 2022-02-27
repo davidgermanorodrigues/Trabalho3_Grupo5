@@ -1,5 +1,5 @@
 <launch>
-    <arg name="player_name" default="blue1"/>
+    <arg name="player_name" default="p_grupo5"/>
 
     <group ns="$(arg player_name)">
 

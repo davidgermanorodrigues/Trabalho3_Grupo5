@@ -4,7 +4,7 @@
   <!--  Arguments-->
 <!--  Arguments are used as: $(arg argument)-->
   <xacro:arg name="player_color" default="Red"/>
-  <xacro:arg name="player_name" default="p_drodrigues"/>
+  <xacro:arg name="player_name" default="p_grupo5"/>
 
   <!--  Copiar os argumentos para dentro das propriedades para que sejam 'incluidos' pelo xacro -->
   <!--  As propriedades usam-se como: ${properties}-->
