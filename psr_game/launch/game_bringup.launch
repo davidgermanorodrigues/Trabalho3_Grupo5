@@ -9,7 +9,6 @@
         <arg name="x_pos" value="5"/>
         <arg name="y_pos" value="5"/>
         <arg name="z_pos" value="0"/>
-        <arg name="visualize" value="True"/>
     </include>
 
 <!--    <include file="$(find psr_game)/launch/bringup.launch">-->
@@ -28,7 +27,6 @@
         <arg name="x_pos" value="-5"/>
         <arg name="y_pos" value="5"/>
         <arg name="z_pos" value="0"/>
-        <arg name="visualize" value="True"/>
     </include>
 
 
