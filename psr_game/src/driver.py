@@ -58,6 +58,9 @@ class Driver:
             self.hunter_team_players = team_green
             print("My name is " + Fore.BLUE + self.name + Style.RESET_ALL + ". I am " + Fore.BLUE + str(self.my_team) + Style.RESET_ALL + " I am hunting " + Fore.RED + str(self.prey_team_players) + Style.RESET_ALL + " and fleeing from " + Fore.GREEN + str(self.hunter_team_players) + Style.RESET_ALL);
 
+        else:
+            raise ValueError('My name is ' + self.name + ' and I am not on any team. I want to play!')
+
         # print("Im " + self.name + ". I am team " + str(self.my_team))
         # print("My name is " + self.name + ". I am " + str(self.my_team) + " I am hunting " + str(self.prey_team_players) + " and fleeing from " + str(self.prey_team_players));
 
