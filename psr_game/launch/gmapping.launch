@@ -1,5 +1,5 @@
 <launch>
-   <arg name="player_name" default="p_grupo5"/>
+    <arg name="player_name" default="p_grupo5"/>
     
     <group ns = "$(arg player_name)">
         <node pkg="gmapping" type="slam_gmapping" name="gmapping" output="screen">
@@ -9,5 +9,4 @@
             <param name="base_frame" value="/$(arg player_name)/base_footprint"/>
         </node>
     </group>
-
 </launch>

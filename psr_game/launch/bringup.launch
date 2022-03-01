@@ -1,22 +1,23 @@
 <launch>
-    <!--Bloco 1: argumentos do launch file.-->
+    <!-- Bloco 1: argumentos do launch file. -->
     <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
-    <arg name="player_name" default="p_grupo5"/>
-    <arg name="player_color" default="Red"/>
-    <arg name="visualize" default="false"/>
+    <arg name="player_name" default="blue1"/>
+    <arg name="player_color" default="Blue"/>
     <arg name="x_pos" default="0.0"/>
-    <arg name="y_pos" default="-2.0"/>
+    <arg name="y_pos" default="0.0"/>
     <arg name="z_pos" default="0.0"/>
+    <arg name="visualize" default="False"/>
+    <arg name="driver" default="True"/>
+    <arg name="driver_mode" default="1"/>
 
     <group ns="$(arg player_name)">
-
         <param name="tf_prefix" value="$(arg player_name)"></param>
-        <!--Bloco 3: Carregamento do xacro do robot para o parâmetro robot_description.-->
+        <!-- Bloco 3: Carregamento do xacro do robot para o parâmetro robot_description. -->
 <!--        <param name="robot_description" command="$(find xacro)/xacro &#45;&#45;inorder $(find p_mpinto_description)/urdf/p_mpinto.urdf.xacro player_name:=$(arg player_name) player_color:=$(arg player_color)" />-->
         <param name="robot_description" command="$(find xacro)/xacro --inorder $(find p_grupo_description)/urdf/p_grupo5.urdf.xacro player_name:=$(arg player_name) player_color:=$(arg player_color)" />
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
-        <!-- Include do spawn.launch-->
+        <!-- Include do spawn.launch -->
         <include file="$(find psr_game)/launch/spawn.launch">
             <arg name="player_name" value="$(arg player_name)"/>
             <arg name="x_pos" value="$(arg x_pos)"/>
@@ -25,7 +26,7 @@
         </include>
 
         <group if ="$(arg visualize)">
-        <!-- Include do vizualize launch-->
+            <!-- Include do vizualize launch -->
             <include file="$(find psr_game)/launch/visualize.launch">
                 <arg name="player_name" value="$(arg player_name)"/>
             </include>
@@ -33,19 +34,32 @@
 
         <include file="$(find psr_game)/launch/set_player_names.launch">
         </include>
-
     </group>
 
-    <!--Include do gmapping.launch -->
+    <!-- Include do gmapping.launch -->
     <include file="$(find psr_game)/launch/gmapping.launch">
         <arg name="player_name" value="$(arg player_name)"/>
     </include>
 
-            <!-- Include do vizualize launch-->
- <!--
-    <group ns="$(arg player_name)">
-        <node name="teleop_rqt" pkg="rqt_robot_steering" type="rqt_robot_steering" output = "screen">
-            <param name="default_topic" value="/$(arg player_name)/cmd_vel"/>
-        </node>
-    </group>  -->
+    <!-- Include do teleop -->
+<!--     <group ns="$(arg player_name)"> -->
+<!--         <node name="teleop_rqt" pkg="rqt_robot_steering" type="rqt_robot_steering" output = "screen"> -->
+<!--             <param name="default_topic" value="/$(arg player_name)/cmd_vel"/> -->
+<!--         </node> -->
+<!--     </group> -->
+
+    <group if="$(arg driver)">
+        <group if="$(eval driver_mode == 1)">
+            <!-- Include do myteleop.launch -->
+            <include file="$(find psr_game)/launch/myteleop.launch">
+                <arg name="player_name" value="$(arg player_name)"/>
+            </include>
+        </group>
+
+        <group if="$(eval driver_mode == 2)">
+            <!-- Include do driver.py -->
+            <node name="$(arg player_name)" pkg="psr_game" type="driver.py" output="screen">
+            </node>
+        </group>
+    </group>
 </launch>

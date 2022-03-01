@@ -1,51 +1,131 @@
 <launch>
-
-        <!--Bloco 1: argumentos do launch file.-->
+    <!-- Bloco 1: argumentos do launch file. -->
     <rosparam command="load" file="$(find psr_game)/params/game.yaml"/>
 
+    <arg name="number_of_players" default="1" doc="number of players [1, 2, 3]"/>
+    <arg name="visualize" default="True"/>
+    <arg name="driver" default="True"/>
+    <arg name="driver_mode" default="2"/>
+    <arg name="referee" default="True"/>
+
+    <!-- When number_of_players == 1 -->
+    <!-- Include de red.Players -->
     <include file="$(find psr_game)/launch/bringup.launch">
         <arg name="player_name" default="red1"/>
         <arg name="player_color" value="Red"/>
         <arg name="x_pos" value="5"/>
         <arg name="y_pos" value="5"/>
         <arg name="z_pos" value="0"/>
+        <arg name="visualize" value="False"/>
+        <arg name="driver" value="$(arg driver)"/>
+        <arg name="driver_mode" value="2"/>
     </include>
 
-<!--    <include file="$(find psr_game)/launch/bringup.launch">-->
-<!--        <arg name="player_name" default="red2"/>-->
-<!--        <arg name="player_color" value="Red"/>-->
-<!--        <arg name="x_pos" value="5"/>-->
-<!--        <arg name="y_pos" value="5"/>-->
-<!--        <arg name="z_pos" value="0"/>-->
-<!--        <arg name="visualize" value="True"/>-->
-<!--    </include>-->
-
-            <!-- Include de green.Players-->
+    <!-- Include de green.Players -->
     <include file="$(find psr_game)/launch/bringup.launch">
         <arg name="player_name" default="green1"/>
         <arg name="player_color" value="Green"/>
         <arg name="x_pos" value="-5"/>
         <arg name="y_pos" value="5"/>
         <arg name="z_pos" value="0"/>
+        <arg name="visualize" value="False"/>
+        <arg name="driver" value="$(arg driver)"/>
+        <arg name="driver_mode" value="2"/>
     </include>
 
-
-<!--    <include file="$(find psr_game)/launch/bringup.launch">-->
-<!--        <arg name="player_name" default="green2"/>-->
-<!--        <arg name="player_color" value="Green"/>-->
-<!--        <arg name="x_pos" value="-5"/>-->
-<!--        <arg name="y_pos" value="5"/>-->
-<!--        <arg name="z_pos" value="0"/>-->
-<!--    </include>-->
-
-            <!-- Include de blue.Players-->
+    <!-- Include de blue.Players -->
     <include file="$(find psr_game)/launch/bringup.launch">
         <arg name="player_name" default="blue1"/>
         <arg name="player_color" value="Blue"/>
         <arg name="x_pos" value="-5"/>
         <arg name="y_pos" value="-2"/>
         <arg name="z_pos" value="0"/>
-        <arg name="visualize" value="True"/>
+        <arg name="visualize" value="$(arg visualize)"/>     <!-- Propositado -->
+        <arg name="driver" value="$(arg driver)"/>
+        <arg name="driver_mode" value="$(arg driver_mode)"/> <!-- Propositado -->
     </include>
 
+    <!-- When number_of_players >= 2 -->
+    <group if="$(eval number_of_players >= 2)">
+        <!-- Include de red.Players -->
+        <include file="$(find psr_game)/launch/bringup.launch">
+            <arg name="player_name" default="red2"/>
+            <arg name="player_color" value="Red"/>
+            <arg name="x_pos" value="5"/>
+            <arg name="y_pos" value="4"/>
+            <arg name="z_pos" value="0"/>
+            <arg name="visualize" value="False"/>
+            <arg name="driver" value="$(arg driver)"/>
+            <arg name="driver_mode" value="2"/>
+        </include>
+
+        <!-- Include de green.Players -->
+        <include file="$(find psr_game)/launch/bringup.launch">
+            <arg name="player_name" default="green2"/>
+            <arg name="player_color" value="Green"/>
+            <arg name="x_pos" value="-5"/>
+            <arg name="y_pos" value="4"/>
+            <arg name="z_pos" value="0"/>
+            <arg name="visualize" value="False"/>
+            <arg name="driver" value="$(arg driver)"/>
+            <arg name="driver_mode" value="2"/>
+        </include>
+
+        <!-- Include de blue.Players -->
+        <include file="$(find psr_game)/launch/bringup.launch">
+            <arg name="player_name" default="blue2"/>
+            <arg name="player_color" value="Blue"/>
+            <arg name="x_pos" value="-5"/>
+            <arg name="y_pos" value="-1"/>
+            <arg name="z_pos" value="0"/>
+            <arg name="visualize" value="False"/>
+            <arg name="driver" value="$(arg driver)"/>
+            <arg name="driver_mode" value="2"/>
+        </include>
+    </group>
+
+    <!-- When number_of_players >= 3 -->
+    <group if="$(eval number_of_players >= 3)">
+        <!-- Include de red.Players -->
+        <include file="$(find psr_game)/launch/bringup.launch">
+            <arg name="player_name" default="red3"/>
+            <arg name="player_color" value="Red"/>
+            <arg name="x_pos" value="5"/>
+            <arg name="y_pos" value="3"/>
+            <arg name="z_pos" value="0"/>
+            <arg name="visualize" value="False"/>
+            <arg name="driver" value="$(arg driver)"/>
+            <arg name="driver_mode" value="2"/>
+        </include>
+
+        <!-- Include de green.Players -->
+        <include file="$(find psr_game)/launch/bringup.launch">
+            <arg name="player_name" default="green3"/>
+            <arg name="player_color" value="Green"/>
+            <arg name="x_pos" value="-5"/>
+            <arg name="y_pos" value="3"/>
+            <arg name="z_pos" value="0"/>
+            <arg name="visualize" value="False"/>
+            <arg name="driver" value="$(arg driver)"/>
+            <arg name="driver_mode" value="2"/>
+        </include>
+
+        <!-- Include de blue.Players -->
+        <include file="$(find psr_game)/launch/bringup.launch">
+            <arg name="player_name" default="blue3"/>
+            <arg name="player_color" value="Blue"/>
+            <arg name="x_pos" value="-5"/>
+            <arg name="y_pos" value="0"/>
+            <arg name="z_pos" value="0"/>
+            <arg name="visualize" value="False"/>
+            <arg name="driver" value="$(arg driver)"/>
+            <arg name="driver_mode" value="2"/>
+        </include>
+    </group>
+
+    <!-- Include do th_referee.py -->
+    <group if="$(arg referee)">
+        <node name="th_referee" pkg="psr_game" type="th_referee.py" output="screen" launch-prefix="gnome-terminal --command">
+        </node>
+    </group>
 </launch>

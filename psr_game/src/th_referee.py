@@ -13,7 +13,6 @@ import math, random
 import subprocess
 from colorama import Fore, Back, Style
 from copy import copy
-
 import pandas
 from functools import partial
 import rospy
@@ -22,6 +21,7 @@ import tf2_ros
 import geometry_msgs.msg
 from gazebo_msgs.msg import ModelState, ModelStates, ContactsState
 from prettytable import PrettyTable
+import readchar
 
 # ------------------------
 #   DATA STRUCTURES
@@ -40,9 +40,7 @@ def bash(cmd, blocking=True, verbose=False):
 
 
 class Referee:
-
     def __init__(self):
-
         rospy.sleep(0.5)  # Wait a bit before starting
 
         # Verify that all the required parameters exist
@@ -51,13 +49,11 @@ class Referee:
         except rospy.ROSException:
             print("Could not get param name")
 
-        required_params = ['/killed_duration', '/game_duration', '/positive_score', '/negative_score', '/best_hunter_score',
-                           '/best_survivor_score', '/red_players', '/green_players', '/blue_players']
+        required_params = ['/killed_duration', '/game_duration', '/positive_score', '/negative_score', '/best_hunter_score', '/best_survivor_score', '/red_players', '/green_players', '/blue_players']
         print(existing_params)
         for required_param in required_params:
             if not required_param in existing_params:
-                raise ValueError('Required ros parameter ' + required_param +
-                                 ' does not exist. Are you sure you load the game params.yaml?')
+                raise ValueError('Required ros parameter ' + required_param + ' does not exist. Are you sure you load the game params.yaml?')
 
         self.params = {'killed_duration': rospy.get_param('/killed_duration'),
                        'game_duration': rospy.get_param('/game_duration'),
@@ -83,25 +79,20 @@ class Referee:
         self.players = {}
         count = 1
         for player in self.params['red']:
-            self.players[player] = PlayerInfo(player, self.params, my_team='red', prey_team='green', hunter_team='blue',
-                                              callbackHuntedEvent=self.callbackHuntedEvent, number=count)
+            self.players[player] = PlayerInfo(player, self.params, my_team='red', prey_team='green', hunter_team='blue', callbackHuntedEvent=self.callbackHuntedEvent, number=count)
             count += 1
         for player in self.params['green']:
-            self.players[player] = PlayerInfo(player, self.params, my_team='green', prey_team='blue', hunter_team='red',
-                                              callbackHuntedEvent=self.callbackHuntedEvent, number=count)
+            self.players[player] = PlayerInfo(player, self.params, my_team='green', prey_team='blue', hunter_team='red', callbackHuntedEvent=self.callbackHuntedEvent, number=count)
             count += 1
         for player in self.params['blue']:
-            self.players[player] = PlayerInfo(player, self.params, my_team='blue', prey_team='red', hunter_team='green',
-                                              callbackHuntedEvent=self.callbackHuntedEvent, number=count)
+            self.players[player] = PlayerInfo(player, self.params, my_team='blue', prey_team='red', hunter_team='green', callbackHuntedEvent=self.callbackHuntedEvent, number=count)
             count += 1
 
         self.game_start_tic = rospy.Time.now()
         self.timer_check_game = rospy.Timer(rospy.Duration(0.1), self.callbackCheckGame, oneshot=False)
-        self.timer_end_game = rospy.Timer(rospy.Duration(self.params['game_duration']), self.callbackEndGame,
-                                          oneshot=True)
+        self.timer_end_game = rospy.Timer(rospy.Duration(self.params['game_duration']), self.callbackEndGame, oneshot=True)
 
     def callbackEndGame(self, event):
-
         self.game_over = True
 
         # Print scoreboard
@@ -117,15 +108,16 @@ class Referee:
         elif self.final_score['blue'] > max(self.final_score['green'], self.final_score['red']):
             print(Style.BRIGHT + 'Game Over! Team ' + Fore.BLUE + 'Blue' + Fore.RESET + ' wins!!!')
 
+        print('=> Press any key to exit.')
+        readchar.readkey()
+
         rospy.signal_shutdown('Game finished')
 
     def printScores(self):
-
         best_hunter, best_survivor = self.getBestHunterAndSurvivor()
 
         print(Style.BRIGHT + '\nPlayer by player scores:' + Style.RESET_ALL)
-        table = PrettyTable(
-            [Back.LIGHTWHITE_EX + "Player", "Team", "#Hunted", "#Preyed", "Killed", "Spawn" + Style.RESET_ALL])
+        table = PrettyTable([Back.LIGHTWHITE_EX + "Player", "Team", "#Hunted", "#Preyed", "Killed", "Spawn" + Style.RESET_ALL])
 
         for _, player in self.players.items():
             num_hunted, num_preyed = str(player.num_hunted), str(player.num_preyed)
@@ -160,17 +152,14 @@ class Referee:
                 self.final_score[team_key] += self.params['best_hunter_score']
             if best_survivor in self.params[team_key]:
                 self.final_score[team_key] += self.params['best_survivor_score']
-            table.add_row([getattr(Fore, team_key.upper()) + team_key + Style.RESET_ALL, str(score),
-                           str(self.final_score[team_key])])
+            table.add_row([getattr(Fore, team_key.upper()) + team_key + Style.RESET_ALL, str(score), str(self.final_score[team_key])])
 
         print(table)
         game_time = "{:.1f}".format((rospy.Time.now() - self.game_start_tic).to_sec())
         print('Game time: ' + game_time + ' out of ' + str(self.params['game_duration']))
 
     def getBestHunterAndSurvivor(self):
-
-        ps = [(player, self.players[player].num_hunted, self.players[player].num_preyed) for player in
-              self.players.keys()]
+        ps = [(player, self.players[player].num_hunted, self.players[player].num_preyed) for player in self.players.keys()]
         hunt_values = [self.players[player].num_hunted for player in self.players.keys()]
         prey_values = [self.players[player].num_preyed for player in self.players.keys()]
 
@@ -255,7 +244,6 @@ class Referee:
 
 
 class PlayerInfo:
-
     def __init__(self, name, players, my_team, prey_team, hunter_team, callbackHuntedEvent, number=1):
         self.name = name
         self.number = number
@@ -263,8 +251,7 @@ class PlayerInfo:
         self.colorama_color = getattr(Fore, my_team.upper())
         self.my_team, self.prey_team, self.hunter_team = my_team, prey_team, hunter_team
 
-        print('Referee configuring ' + self.name + ', from team ' + self.my_team + ', hunting ' + str(
-            self.players[self.prey_team]) + ' and fleeing from ' + str(self.players[self.hunter_team]))
+        print('Referee configuring ' + self.name + ', from team ' + self.my_team + ', hunting ' + str(self.players[self.prey_team]) + ' and fleeing from ' + str(self.players[self.hunter_team]))
 
         self.callbackHuntedEvent = callbackHuntedEvent
 
@@ -273,8 +260,7 @@ class PlayerInfo:
         self.num_hunted = 0
         self.num_preyed = 0
 
-        self.subscriber_contact = rospy.Subscriber('/' + self.name + '/contact', ContactsState,
-                                                   self.callbackContactReceived)
+        self.subscriber_contact = rospy.Subscriber('/' + self.name + '/contact', ContactsState, self.callbackContactReceived)
 
         print(self.__str__())  # print a report after initialization
 
@@ -309,7 +295,6 @@ class PlayerInfo:
 # ------------------------
 # GLOBAL VARIABLES
 # ------------------------
-
 def main():
     rospy.init_node('th_referee')  # initialize the ros node
     rospy.sleep(0.2)  # make sure the rospy time works

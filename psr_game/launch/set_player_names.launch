@@ -1,6 +1,4 @@
 <?xml version="1.0"?>
 <launch>
-
-  <node pkg="psr_game" name="set_player_names" type="set_player_names.py" args="-d $(find psr_game)/src/set_player_names.py" />
-
+    <node pkg="psr_game" name="set_player_names" type="set_player_names.py" args="-d $(find psr_game)/src/set_player_names.py" />
 </launch>

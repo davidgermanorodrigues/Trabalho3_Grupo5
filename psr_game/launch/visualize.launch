@@ -1,5 +1,6 @@
 <launch>
     <!-- Launch rviz, loading configuration file -->
     <arg name="player_name" default="p_grupo5"/>
+
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find psr_game)/config/$(arg player_name).rviz" />
 </launch>
