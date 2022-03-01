@@ -6,9 +6,9 @@
     <arg name="x_pos" default="0.0"/>
     <arg name="y_pos" default="0.0"/>
     <arg name="z_pos" default="0.0"/>
-    <arg name="visualize" default="False"/>
+    <arg name="visualize" default="True"/>
     <arg name="driver" default="True"/>
-    <arg name="driver_mode" default="1"/>
+    <arg name="driver_mode" default="1" doc="driver mode [1, 2]"/>
 
     <group ns="$(arg player_name)">
         <param name="tf_prefix" value="$(arg player_name)"></param>

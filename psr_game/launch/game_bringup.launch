@@ -3,9 +3,9 @@
     <rosparam command="load" file="$(find psr_game)/params/game.yaml"/>
 
     <arg name="number_of_players" default="1" doc="number of players [1, 2, 3]"/>
-    <arg name="visualize" default="True"/>
+    <arg name="visualize" default="False"/>
     <arg name="driver" default="True"/>
-    <arg name="driver_mode" default="2"/>
+    <arg name="driver_mode" default="2" doc="driver mode [1, 2]"/>
     <arg name="referee" default="True"/>
 
     <!-- When number_of_players == 1 -->
