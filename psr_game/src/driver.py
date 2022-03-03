@@ -17,15 +17,18 @@ class Driver:
         # ------VARIABLES------
         self.name = None
         self.my_team = None
+        self.limit_hunt = None
+        self.limit_escape = None
         self.width = None
         self.height = None
         self.centroid = None
         self.goal_active = None
+        self.goal_escape = None
         self.goal = PoseStamped()
         self.angle = None
         self.speed = None
-        self.Turn_Right = None
         self.Turn_Left = None
+        self.Turn_Right = None
         self.Reverse = None
         self.V_Slow = None
         self.V_Medium = None
@@ -82,12 +85,12 @@ class Driver:
         # Wall = 0.20
         Wall = 0.50
 
-        # Incremento=0.0175,ranges[0] = para a frente, angle_max=2*pi,são 359 medidas (angle_max/incremento~359), logo o index pode ser traduzido em graus
+        # Incremento=0.0175, ranges[0] = para a frente, angle_max=2*pi, são 359 medidas (angle_max/incremento~359), logo o index pode ser traduzido em graus
 
         med_E  = msg.ranges[70]   # Propositado
         med_NE = msg.ranges[25]
         med_N  = msg.ranges[0]
-        med_NW = msg.ranges[25]
+        med_NW = msg.ranges[335]
         med_W  = msg.ranges[290]  # Propositado
 
         if med_E < min3: sensor_E = True
@@ -105,24 +108,24 @@ class Driver:
         if (med_N > Wall and med_NE > Wall) or (med_N > Wall and med_NW > Wall):
             # ------WALL LEFT------
             if (sensor_NE and sensor_E) or (sensor_N and sensor_E) or (sensor_N and sensor_NE):
-                self.Turn_Right = True
                 self.Turn_Left = False
+                self.Turn_Right = True
                 self.Reverse = False
             # ------WALL RIGHT------
             elif (sensor_NW and sensor_W) or (sensor_N and sensor_W) or (sensor_N and sensor_NW):
-                self.Turn_Right = False
                 self.Turn_Left = True
+                self.Turn_Right = False
                 self.Reverse = False
             # ------NOTHING------
             else:
-                self.Turn_Right = False
                 self.Turn_Left = False
+                self.Turn_Right = False
                 self.Reverse = False
         # ------STUCK AGAINST WALL------
         else:
-            self.Reverse = True
-            self.Turn_Right = False
             self.Turn_Left = False
+            self.Turn_Right = False
+            self.Reverse = True
 
         # ------SPEED METER------
         if med_N < 1.45 or (med_E < 1 or med_W < 1):
@@ -318,11 +321,11 @@ class Driver:
         # cv2.imshow('CM', Mask_closed)
 
         # print(str(cv_image.shape[1]))
-        self.centroid_hunt = centroid_hunt[0]
-        self.Move(self.goal_active, self.goal_escape, self.width, self.centroid_hunt, self.Turn_Right, self.Turn_Left, self.Reverse, self.V_Slow, self.V_Medium, self.V_Fast)
+        # self.centroid_hunt = centroid_hunt[0]
+        self.Move(self.goal_active, self.goal_escape, self.width, centroid_hunt[0], centroid_escape[0], self.Turn_Right, self.Turn_Left, self.Reverse, self.V_Slow, self.V_Medium, self.V_Fast)
         cv2.waitKey(1)
 
-    def Move(self, goal_active, goal_escape, width, centroid_hunt, Turn_Right, Turn_Left, Reverse, V_Slow, V_Medium, V_Fast):
+    def Move(self, goal_active, goal_escape, width, centroid_hunt_width, centroid_escape_width, Turn_Right, Turn_Left, Reverse, V_Slow, V_Medium, V_Fast):
         # ------NAVIGATION------
         if not goal_active:
             if not Reverse:
@@ -338,10 +341,19 @@ class Driver:
                     self.state = 'Turn Left'
                 else:
                     if goal_escape == True:
-                        self.speed = 1.0
-                        self.angle = 1.0
                         # print('Escaping')
                         self.state = 'Escaping'
+                        self.speed = 1.0
+                        if centroid_escape_width < width * 0.5:
+                            if centroid_escape_width < (0.8 * (width / 2)):
+                                self.angle = -0.35
+                            else:
+                                self.angle = -0.70
+                        if centroid_escape_width > width * 0.5:
+                            if centroid_escape_width > (1.20 * (width / 2)):
+                                self.angle = 0.35
+                            else:
+                                self.angle = 0.70
                     elif V_Slow:
                         self.speed = 0.6
                         self.angle = 0
@@ -367,17 +379,17 @@ class Driver:
             # print('Hunting')
             self.state = 'Hunting'
             self.speed = 0.8
-            if centroid_hunt < width * 0.5:
-                if centroid_hunt < (0.8 * (width / 2)):
+            if centroid_hunt_width < width * 0.5:
+                if centroid_hunt_width < (0.8 * (width / 2)):
                     self.angle = 0.70
                 else:
                     self.angle = 0.35
-            if centroid_hunt > width * 0.5:
-                if centroid_hunt > (1.20 * (width / 2)):
+            if centroid_hunt_width > width * 0.5:
+                if centroid_hunt_width > (1.20 * (width / 2)):
                     self.angle = -0.70
                 else:
                     self.angle = -0.35
-            if centroid_hunt == width * 0.5:
+            if centroid_hunt_width == width * 0.5:
                 self.angle = 0.00
 
         twist = Twist()
